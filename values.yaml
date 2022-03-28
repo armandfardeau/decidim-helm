@@ -55,18 +55,19 @@ service:
 ingress:
   enabled: false
   className: ""
-  annotations: { }
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/issuer: letsencrypt-prod
   hosts:
     - host: chart-example.local
       paths:
         - path: /
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: [ ]
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+    - hosts:
+        -  chart-example.local
+      secretName: decidim-sen-ingress-secret
 
 resources: { }
   # We usually recommend not to specify default resources and to leave this as a conscious
