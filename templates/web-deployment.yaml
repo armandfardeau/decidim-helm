@@ -5,6 +5,9 @@ metadata:
   labels:
     {{- include "decidim-helm.webLabels" . | nindent 4 }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ include "decidim-helm.webFullname" . }}
   {{- if not .Values.webAutoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
