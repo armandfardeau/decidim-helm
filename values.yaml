@@ -106,3 +106,8 @@ webContainerPort: 3000
 migrateJob:
   ttlSecondsAfterFinished: 120
   command: ["bundle",  "exec", "rails", "db:migrate"]
+
+databases:
+  postgresql:
+    externalPostgresDabatase: false
+    database_url: "host.example.org"
