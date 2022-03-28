@@ -10,7 +10,7 @@ spec:
     matchLabels:
       app: {{ include "decidim-helm.webFullname" . }}
   {{- if not .Values.webAutoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.deployment.web.replicaCount }}
   {{- end }}
   template:
     metadata:

@@ -1,21 +1,14 @@
-# Default values for ..
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Decidim Helm values
+# Tree:
+# kubernetes-kind:
+#   sidekiq | web | common:
+#     <YAML configuration>
 
-# Define client informations
-client:
-  name: ""
-  fullname: ""
-
-web:
-  name: ""
-  fullname: ""
-
-sidekiq:
-  name: ""
-  fullname: ""
-
-replicaCount: 1
+# A Deployment provides declarative updates for Pods and ReplicaSets.
+# Documentation: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+deployment:
+  web:
+    replicaCount: 1
 
 image:
   repository: rg.fr-par.scw.cloud/decidim-sen/decidim-sen
