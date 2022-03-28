@@ -1,15 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: decidim-sen-migration-job
+  name: {{ include "..fullname" . }}
 spec:
-  ttlSecondsAfterFinished: 120
+  ttlSecondsAfterFinished: {{ .Values.migrateJob.ttlSecondsAfterFinished }}
   template:
     spec:
       containers:
         - name: decidim-sen-migration-job
-          image: rg.fr-par.scw.cloud/decidim-sen/decidim-sen:latest
-          command: ["bundle",  "exec", "rails", "db:migrate"]
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: {{ .Values.migrateJob.command }}
           envFrom:
             - configMapRef:
                 name: decidim-sen-app-config

@@ -101,3 +101,7 @@ tolerations: [ ]
 affinity: { }
 
 webContainerPort: 3000
+
+migrateJob:
+  ttlSecondsAfterFinished: 120
+  command: ["bundle",  "exec", "rails", "db:migrate"]
