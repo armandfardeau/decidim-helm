@@ -62,6 +62,8 @@ deployment:
     fullname: ""
     fullnameOverride: ""
 
+# A HorizontalPodAutoscaler automatically updates a workload resource (such as a Deployment or StatefulSet), with the aim of automatically scaling the workload to match demand.
+# Documentation: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 hpa:
   sidekiq:
     enabled: true
@@ -78,22 +80,16 @@ hpa:
     stabilizationWindowSeconds: 30
     targetMemoryUtilizationPercentage: ""
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: { }
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-# fsGroup: 2000
-
+# An abstract way to expose an application running on a set of Pods as a network service.
+# Documentation: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   type: LoadBalancer
   port: 80
   targetPort: 3000
 
+# An API object that manages external access to the services in a cluster, typically HTTP.
+# Ingress may provide load balancing, SSL termination and name-based virtual hosting.
+# Documentation: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: true
   className: ""
@@ -111,7 +107,14 @@ ingress:
         -  chart-example.local
       secretName: decidim-sen-ingress-secret
 
-webContainerPort: 3000
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
 
 migrateJob:
   ttlSecondsAfterFinished: 120
