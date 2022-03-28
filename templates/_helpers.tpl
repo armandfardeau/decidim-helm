@@ -38,6 +38,20 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create a default fully qualified web app name.
+We truncate at 59 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "decidim-helm.sdqFullname" -}}
+{{- if .Values.sdqFullnameOverride }}
+{{- .Values.web.fullname | trunc 59 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.web.name }}
+{{- printf "%s-%s-%s" .Release.Name "sdq" $name | trunc 59 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "decidim-helm.chart" -}}
@@ -93,7 +107,7 @@ Selector labels
 */}}
 {{- define "decidim-helm.webSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "decidim-helm.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ include "decidim-helm.webFullname" . }}
 {{- end }}
 
 {{/*
@@ -101,7 +115,7 @@ Selector labels
 */}}
 {{- define "decidim-helm.sdqSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "decidim-helm.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app: {{ include "decidim-helm.sdqFullname" . }}
 {{- end }}
 
 {{/*
