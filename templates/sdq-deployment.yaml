@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.sidekiq.deployment.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.sidekiq.deployment.spec.labels.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.sidekiq.deployment.spec.labels.app }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ .Values.sidekiq.deployment.spec.labels.app }}
+                topologyKey: topology.kubernetes.io/zone
+      terminationGracePeriodSeconds: {{ .Values.sidekiq.deployment.spec.affinity.termination.gracePeriodSeconds }}
+      containers:
+        - name: {{ .Values.sidekiq.deployment.spec.labels.app }}
+          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+          resources:
+            {{- toYaml .Values.sidekiq.deployment.spec.containers.resources | nindent 12 }}
+          command: [ "sidekiq", "-C", "config/sidekiq.yml" ]
+          ports:
+            - containerPort: 7433
+          {{ if .Values.sidekiq.deployment.spec.containers.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /sidekiq_alive
+              port: 7433
+            initialDelaySeconds: {{ .Values.sidekiq.deployment.spec.containers.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.sidekiq.deployment.spec.containers.livenessProbe.timeoutSeconds }}
+          {{ end }}
+          {{ if .Values.sidekiq.deployment.spec.containers.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /sidekiq_alive
+              port: 7433
+            initialDelaySeconds: {{ .Values.sidekiq.deployment.spec.containers.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.sidekiq.deployment.spec.containers.readinessProbe.timeoutSeconds }}
+          {{ end }}
+          lifecycle:
+            preStop:
+              exec:
+                # SIGTERM triggers a quick exit; gracefully terminate instead
+                command: [ './sidekiq_quiet.sh' ]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.sidekiq.configMap.name }}
+            - secretRef:
+                name: {{ .Values.sidekiq.secretRef.name }}
