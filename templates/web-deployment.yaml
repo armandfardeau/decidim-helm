@@ -31,18 +31,18 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- toYaml .Values.deployment.web.spec.containers.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           startupProbe:
             httpGet:
-              path: /health_check
-              port: {{ .Values.webContainerPort }}
-            initialDelaySeconds: {{ .Values.webContainerPort }}
-            failureThreshold: 30
-            periodSeconds: 10
+              path: {{ default "/health_check" .Values.deployment.web.spec.containers.startupProbe.path }}
+              port: {{ .Values.deployment.web.spec.containers.port }}
+            initialDelaySeconds: {{ .Values.deployment.web.spec.containers.startupProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.deployment.web.spec.containers.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.deployment.web.spec.containers.startupProbe.periodSeconds }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.deployment.web.spec.containers.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.webContainerPort }}
           env:
@@ -55,15 +55,15 @@ spec:
                 name: {{ printf "%s-%s" $fullName "config" }}
             - secretRef:
                 name: {{ printf "%s-%s" $fullName "secrets" }}
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.deployment.web.spec.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with .Values.deployment.web.spec.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.deployment.web.spec.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
