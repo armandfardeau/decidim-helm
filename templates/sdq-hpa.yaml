@@ -1,4 +1,4 @@
-{{- if .Values.webAutoscaling.enabled }}
+{{- if .Values.sdqAutoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,26 +10,26 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "decidim-helm.webFullname" . }}
-  minReplicas: {{ .Values.webAutoscaling.minReplicas }}
-  maxReplicas: {{ .Values.webAutoscaling.maxReplicas }}
+  minReplicas: {{ .Values.sdqAutoscaling.minReplicas }}
+  maxReplicas: {{ .Values.sdqAutoscaling.maxReplicas }}
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: {{ .Values.webAutoscaling.stabilizationWindowSeconds }}
+      stabilizationWindowSeconds: {{ .Values.sdqAutoscaling.stabilizationWindowSeconds }}
   metrics:
-    {{- if .Values.webAutoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.sdqAutoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.webAutoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.sdqAutoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.webAutoscaling.targetMemoryUtilizationPercentage }}
+    {{- if .Values.sdqAutoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.webAutoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ .Values.sdqAutoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

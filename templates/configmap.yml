@@ -1,9 +1,10 @@
+{{- $fullName := include "decidim-helm.fullname" . -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: decidim-sen-app-config
+  name: {{ printf "%s-%s" $fullName "config" }}
   labels:
-    app: decidim-sen-app
+    {{- include "decidim-helm.labels" . | nindent 4 }}
 data:
   RAILS_ENV: production
   RAILS_SERVE_STATIC_FILES: "true"

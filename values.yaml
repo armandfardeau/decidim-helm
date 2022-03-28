@@ -18,7 +18,7 @@ sidekiq:
 replicaCount: 1
 
 image:
-  repository: rg.fr-par.scw.cloud/decidim-sen/decidim-sen-frontend
+  repository: rg.fr-par.scw.cloud/decidim-sen/decidim-sen
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
@@ -53,7 +53,7 @@ service:
   targetPort: 3000
 
 ingress:
-  enabled: false
+  enabled: true
   className: ""
   annotations:
     kubernetes.io/ingress.class: "nginx"
@@ -82,14 +82,14 @@ resources: { }
 #   memory: 128Mi
 
 webAutoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 6
   maxReplicas: 100
   targetCPUUtilizationPercentage: 70
   stabilizationWindowSeconds: 30
 
 sdqAutoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
   maxReplicas: 100
   targetCPUUtilizationPercentage: 70

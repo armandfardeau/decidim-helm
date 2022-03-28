@@ -1,3 +1,4 @@
+{{- $fullName := include "decidim-helm.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,9 +53,9 @@ spec:
                   fieldPath: status.podIP
           envFrom:
             - configMapRef:
-                name: decidim-sen-app-config
+                name: {{ printf "%s-%s" $fullName "config" }}
             - secretRef:
-                name: decidim-sen-app-secrets
+                name: {{ printf "%s-%s" $fullName "secrets" }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
