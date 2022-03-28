@@ -29,10 +29,10 @@ We truncate at 59 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "decidim-helm.webFullname" -}}
-{{- if .Values.webFullnameOverride }}
-{{- .Values.web.fullname | trunc 59 | trimSuffix "-" }}
+{{- if .Values.deployment.web.fullnameOverride }}
+{{- .Values.deployment.web.fullnameOverride | trunc 59 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.web.name }}
+{{- $name := default .Chart.Name .Values.deployment.web.name }}
 {{- printf "%s-%s-%s" .Release.Name "web" $name | trunc 59 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
@@ -43,10 +43,10 @@ We truncate at 59 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "decidim-helm.sdqFullname" -}}
-{{- if .Values.sdqFullnameOverride }}
-{{- .Values.web.fullname | trunc 59 | trimSuffix "-" }}
+{{- if .Values.deployment.sidekiq.fullnameOverride }}
+{{- .Values.deployment.web.fullname | trunc 59 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.web.name }}
+{{- $name := default .Chart.Name .Values.deployment.web.name }}
 {{- printf "%s-%s-%s" .Release.Name "sdq" $name | trunc 59 | trimSuffix "-" }}
 {{- end }}
 {{- end }}
@@ -133,5 +133,5 @@ Create the name of the service account to use
 Web container port
 */}}
 {{- define "decidim-helm.webContainerPort" -}}
-{{- default 3000 .Values.containerPort }}
+{{- default 3000 .Values.deployment.web.spec.containers.port }}
 {{- end }}

@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: {{ include "decidim-helm.webFullname" . }}
-  {{- if not .Values.webAutoscaling.enabled }}
+  {{- if not .Values.hpa.web.enabled }}
   replicas: {{ .Values.deployment.web.replicaCount }}
   {{- end }}
   template:

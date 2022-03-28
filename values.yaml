@@ -19,6 +19,10 @@ image:
 # Documentation: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   web:
+    name: ""
+    nameOverride: ""
+    fullname: ""
+    fullnameOverride: ""
     replicaCount: 1
     spec:
       affinity: { }
@@ -52,6 +56,11 @@ deployment:
       podSecurityContext: { }
       nodeSelector: { }
       tolerations: [ ]
+  sidekiq:
+    name: ""
+    nameOverride: ""
+    fullname: ""
+    fullnameOverride: ""
 
 hpa:
   sidekiq:
@@ -60,6 +69,7 @@ hpa:
     maxReplicas: 100
     targetCPUUtilizationPercentage: 70
     stabilizationWindowSeconds: 30
+    targetMemoryUtilizationPercentage: ""
   web:
     enabled: true
     minReplicas: 6
@@ -100,10 +110,6 @@ ingress:
     - hosts:
         -  chart-example.local
       secretName: decidim-sen-ingress-secret
-
-webAutoscaling:
-
-
 
 webContainerPort: 3000
 
