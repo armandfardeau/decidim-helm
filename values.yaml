@@ -53,6 +53,21 @@ deployment:
       nodeSelector: { }
       tolerations: [ ]
 
+hpa:
+  sidekiq:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 70
+    stabilizationWindowSeconds: 30
+  web:
+    enabled: true
+    minReplicas: 6
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 70
+    stabilizationWindowSeconds: 30
+    targetMemoryUtilizationPercentage: ""
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -87,18 +102,8 @@ ingress:
       secretName: decidim-sen-ingress-secret
 
 webAutoscaling:
-  enabled: true
-  minReplicas: 6
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 70
-  stabilizationWindowSeconds: 30
 
-sdqAutoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 70
-  stabilizationWindowSeconds: 30
+
 
 webContainerPort: 3000
 
