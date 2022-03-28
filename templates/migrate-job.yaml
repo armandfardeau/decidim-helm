@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "..fullname" . }}
+  name: {{ include "decidim-helm.fullname" . }}
 spec:
   ttlSecondsAfterFinished: {{ .Values.migrateJob.ttlSecondsAfterFinished }}
   template:

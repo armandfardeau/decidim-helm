@@ -1,29 +1,35 @@
 {{- if .Values.webAutoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "..fullname" . }}
+  name: {{ include "decidim-helm.fullname" . }}
   labels:
-    {{- include "..labels" . | nindent 4 }}
+    {{- include "decidim-helm.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "..webFullname" . }}
+    name: {{ include "decidim-helm.webFullname" . }}
   minReplicas: {{ .Values.webAutoscaling.minReplicas }}
   maxReplicas: {{ .Values.webAutoscaling.maxReplicas }}
-  stabilizationWindowSeconds: {{ .Values.webAutoscaling.stabilizationWindowSeconds }}
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: {{ .Values.webAutoscaling.stabilizationWindowSeconds }}
   metrics:
     {{- if .Values.webAutoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.webAutoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.webAutoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.webAutoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.webAutoscaling.targetMemoryUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.webAutoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

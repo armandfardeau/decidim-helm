@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "..webFullname" . }}-test-connection"
+  name: "{{ include "decidim-helm.webFullname" . }}-test-connection"
   labels:
-    {{- include "..webLabels" . | nindent 4 }}
+    {{- include "decidim-helm.webLabels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "..webFullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "decidim-helm.webFullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

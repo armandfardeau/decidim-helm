@@ -1,15 +1,8 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "..name" -}}
-    {{- default .Chart.Name .Values.client.name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "..chart" -}}
-    {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- define "decidim-helm.name" -}}
+    {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -17,12 +10,16 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "..fullname" -}}
-    {{- if .Values.client.fullname }}
-        {{- .Values.client.fullname | trunc 63 | trimSuffix "-" }}
+{{- define "decidim-helm.fullname" -}}
+    {{- if .Values.fullnameOverride }}
+        {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
     {{- else }}
-        {{- $name := default .Chart.Name .Values.client.name }}
-        {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+        {{- $name := default .Chart.Name .Values.nameOverride }}
+        {{- if contains $name .Release.Name }}
+            {{- .Release.Name | trunc 63 | trimSuffix "-" }}
+        {{- else }}
+            {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+        {{- end }}
     {{- end }}
 {{- end }}
 
@@ -31,7 +28,7 @@ Create a default fully qualified web app name.
 We truncate at 59 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "..webFullname" -}}
+{{- define "decidim-helm.webFullname" -}}
     {{- if .Values.webFullnameOverride }}
         {{- .Values.web.fullname | trunc 59 | trimSuffix "-" }}
     {{- else }}
@@ -41,25 +38,18 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
-Create a default fully qualified sidekiq app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+Create chart name and version as used by the chart label.
 */}}
-{{- define "..sdqfullname" -}}
-    {{- if .Values.sidekiq.fullname }}
-        {{- .Values.sidekiq.fullname | trunc 59 | trimSuffix "-" }}
-    {{- else }}
-        {{- $name := default .Chart.Name .Values.sidekiq.name }}
-        {{- printf "%s-%s-%s" .Release.Name "sdq" $name | trunc 59 | trimSuffix "-" }}
-    {{- end }}
+{{- define "decidim-helm.chart" -}}
+    {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "..labels" -}}
-        helm.sh/chart: {{ include "..chart" . }}
-        {{ include "..selectorLabels" . }}
+{{- define "decidim-helm.labels" -}}
+    helm.sh/chart: {{ include "decidim-helm.chart" . }}
+    {{ include "decidim-helm.selectorLabels" . }}
     {{- if .Chart.AppVersion }}
         app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     {{- end }}
@@ -69,9 +59,9 @@ Common labels
 {{/*
 Common web labels
 */}}
-{{- define "..webLabels" -}}
-        helm.sh/chart: {{ include "..chart" . }}
-        {{ include "..webSelectorLabels" . }}
+{{- define "decidim-helm.webLabels" -}}
+        helm.sh/chart: {{ include "decidim-helm.chart" . }}
+        {{ include "decidim-helm.webSelectorLabels" . }}
     {{- if .Chart.AppVersion }}
         app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     {{- end }}
@@ -81,9 +71,9 @@ Common web labels
 {{/*
 Common sidekiq labels
 */}}
-{{- define "..sdqLabels" -}}
-        helm.sh/chart: {{ include "..chart" . }}
-        {{ include "..sdqSelectorLabels" . }}
+{{- define "decidim-helm.sdqLabels" -}}
+        helm.sh/chart: {{ include "decidim-helm.chart" . }}
+        {{ include "decidim-helm.sdqSelectorLabels" . }}
     {{- if .Chart.AppVersion }}
         app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     {{- end }}
@@ -93,42 +83,41 @@ Common sidekiq labels
 {{/*
 Selector labels
 */}}
-{{- define "..selectorLabels" -}}
-        app.kubernetes.io/name: {{ include "..name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "decidim-helm.selectorLabels" -}}
+    app.kubernetes.io/name: {{ include "decidim-helm.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector web labels
+Selector labels
 */}}
-{{- define "..webSelectorLabels" -}}
-        app.kubernetes.io/name: {{ include "..name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "decidim-helm.webSelectorLabels" -}}
+    app.kubernetes.io/name: {{ include "decidim-helm.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector sidekiq labels
+Selector labels
 */}}
-{{- define "..sdqSelectorLabels" -}}
-        app.kubernetes.io/name: {{ include "..name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "decidim-helm.sdqSelectorLabels" -}}
+    app.kubernetes.io/name: {{ include "decidim-helm.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the web service account to use
+Create the name of the service account to use
 */}}
-{{- define "..serviceAccountName" -}}
+{{- define "decidim-helm.serviceAccountName" -}}
     {{- if .Values.serviceAccount.create }}
-        {{- default (include "..fullname" .) .Values.serviceAccount.name }}
+        {{- default (include "decidim-helm.fullname" .) .Values.serviceAccount.name }}
     {{- else }}
         {{- default "default" .Values.serviceAccount.name }}
     {{- end }}
 {{- end }}
 
-
 {{/*
 Web container port
 */}}
-{{- define "..webContainerPort" -}}
+{{- define "decidim-helm.webContainerPort" -}}
     {{- default 3000 .Values.containerPort }}
 {{- end }}

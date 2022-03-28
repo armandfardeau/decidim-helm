@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "..webFullname" . }}
+  name: {{ include "decidim-helm.webFullname" . }}
   labels:
-    {{- include "..webLabels" . | nindent 4 }}
+    {{- include "decidim-helm.webLabels" . | nindent 4 }}
 spec:
   {{- if not .Values.webAutoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -15,13 +15,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "..webSelectorLabels" . | nindent 8 }}
+        {{- include "decidim-helm.webSelectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "..serviceAccountName" . }}
+      serviceAccountName: {{ include "decidim-helm.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
