@@ -2,19 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Define client informations
-client:
-  name: ""
-  fullname: ""
-
-web:
-  name: ""
-  fullname: ""
-
-sidekiq:
-  name: ""
-  fullname: ""
-
 replicaCount: 1
 
 image:
@@ -111,3 +98,52 @@ databases:
   postgresql:
     externalPostgresDabatase: false
     database_url: "host.example.org"
+
+#### SIDEKIQ Deployment ####
+
+sidekiq:
+  configMap:
+    name: decidim-sen-sidekiq-config
+    data:
+      RAILS_ENV: production
+      APP_NAME: "decidim_sen"
+      RAILS_LOG_TO_STDOUT: "true"
+    ############ data ################
+    ## Must be a yaml format like below  ##
+    ## Uncomment these lines to specify  ##
+    #data:
+    #  RAILS_ENV: production
+    #  APP_NAME: "decidim_sen"
+    #  RAILS_LOG_TO_STDOUT: 'true'
+    #######################################
+  deployment:
+    name: sidekiq-sen-sidekiq-deployment
+    spec:
+      labels:
+        app: decidim-sen-sidekiq
+      affinity:
+        termination:
+          gracePeriodSeconds: 60 # Put your longest job here
+      containers:
+        livenessProbe:
+          enabled: "true"
+          initialDelaySeconds: 60 # app specific. Time your sidekiq takes to start processing.
+          timeoutSeconds: 5 # can be much less
+        readinessProbe:
+          enabled: "true"
+          initialDelaySeconds: 60 # app specific. Time your sidekiq takes to start processing.
+          timeoutSeconds: 5 # can be much less
+        resources: {}
+        ############ Resources ################
+        ## Must be a yaml format like below  ##
+        ## Uncomment these lines to specify  ##
+        #resources:
+        #  requests:
+        #    cpu: "100m"
+        #    memory: "450Mi"
+        #  limits:
+        #    cpu: "1200m"
+        #    memory: "1200Mi"
+        #######################################
+  secretRef:
+    name: decidim-sidekiq-secret
