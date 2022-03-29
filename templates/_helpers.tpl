@@ -30,7 +30,7 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "decidim-helm.webFullname" -}}
 {{- if .Values.deployment.web.fullnameOverride }}
-{{- .Values.deployment.web.fullnameOverride | trunc 59 | trimSuffix "-" }}
+{{- .Values.deployment.web.fullname | trunc 59 | trimSuffix "-" }}
 {{- else }}
 {{- $name := default .Chart.Name .Values.deployment.web.name }}
 {{- printf "%s-%s-%s" .Release.Name "web" $name | trunc 59 | trimSuffix "-" }}
@@ -44,7 +44,7 @@ If release name contains chart name it will be used as a full name.
 */}}
 {{- define "decidim-helm.sdqFullname" -}}
 {{- if .Values.deployment.sidekiq.fullnameOverride }}
-{{- .Values.deployment.web.fullname | trunc 59 | trimSuffix "-" }}
+{{- .Values.deployment.sidekiq.fullname | trunc 59 | trimSuffix "-" }}
 {{- else }}
 {{- $name := default .Chart.Name .Values.deployment.web.name }}
 {{- printf "%s-%s-%s" .Release.Name "sdq" $name | trunc 59 | trimSuffix "-" }}

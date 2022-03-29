@@ -1,3 +1,4 @@
+{{- $fullName := include "decidim-helm.fullname" . -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -12,7 +13,7 @@ spec:
           command: {{ .Values.migrateJob.command }}
           envFrom:
             - configMapRef:
-                name: decidim-sen-app-config
+                name: {{ printf "%s-%s" $fullName "config" }}
             - secretRef:
-                name: decidim-sen-app-secrets
+                name: {{ printf "%s-%s" $fullName "secrets" }}
       restartPolicy: Never

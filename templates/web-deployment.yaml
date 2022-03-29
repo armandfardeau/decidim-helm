@@ -10,7 +10,7 @@ spec:
     matchLabels:
       app: {{ include "decidim-helm.webFullname" . }}
   {{- if not .Values.hpa.web.enabled }}
-  replicas: {{ .Values.deployment.web.replicaCount }}
+  replicas: {{ .Values.deployment.web.replicasCount }}
   {{- end }}
   template:
     metadata:
@@ -21,6 +21,7 @@ spec:
       labels:
         {{- include "decidim-helm.webSelectorLabels" . | nindent 8 }}
     spec:
+      {{ .Values.deployment.sidekiq.spec.termination.gracePeriodSeconds }}
       {{- with .Values.deployment.web.spec.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -59,11 +60,16 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.deployment.web.spec.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.deployment.web.spec.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{- include "decidim-helm.webSelectorLabels" . | nindent 8 }}
+                topologyKey: topology.kubernetes.io/zone
+      terminationGracePeriodSeconds: {{ .Values.deployment.web.spec.termination.gracePeriodSeconds }}
