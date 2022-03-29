@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.sidekiq.configMap.name }}
-  labels:
-    app: {{ .Values.sidekiq.deployment.spec.labels.app }}
-data:
-  {{- toYaml .Values.sidekiq.configMap.data | nindent 2 }}

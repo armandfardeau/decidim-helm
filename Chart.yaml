@@ -24,3 +24,8 @@ version: 0.1.0
 appVersion: "1.16.0"
 
 icon: https://aspgems.com/wp-content/uploads/2020/01/decidim-logo.png
+
+dependencies:
+  - name: redis-cluster
+    version: 6.2.x
+    repository: https://charts.bitnami.com/bitnami

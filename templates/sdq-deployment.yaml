@@ -1,15 +1,25 @@
+{{- $fullName := include "decidim-helm.fullname" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.sidekiq.deployment.name }}
+  name: {{ include "decidim-helm.sdqFullname" . }}
+  labels:
+    {{- include "decidim-helm.sdqLabels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.sidekiq.deployment.spec.labels.app }}
+      app: {{ include "decidim-helm.sdqFullname" . }}
+  {{- if not .Values.hpa.sidekiq.enabled }}
+  replicas: {{ .Values.deployment.sidekiq.replicasCount }}
+  {{- end }}
   template:
     metadata:
+      {{- with .Values.deployment.sidekiq.spec.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app: {{ .Values.sidekiq.deployment.spec.labels.app }}
+        {{- include "decidim-helm.sdqSelectorLabels" . | nindent 8 }}
     spec:
       affinity:
         podAntiAffinity:
@@ -21,32 +31,32 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - {{ .Values.sidekiq.deployment.spec.labels.app }}
+                        - {{- include "decidim-helm.sdqSelectorLabels" . | nindent 8 }}
                 topologyKey: topology.kubernetes.io/zone
-      terminationGracePeriodSeconds: {{ .Values.sidekiq.deployment.spec.affinity.termination.gracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.sidekiq.spec.termination.gracePeriodSeconds }}
       containers:
-        - name: {{ .Values.sidekiq.deployment.spec.labels.app }}
+        - name: {{- include "decidim-helm.sdqLabels" . | nindent 4 }}
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
           resources:
-            {{- toYaml .Values.sidekiq.deployment.spec.containers.resources | nindent 12 }}
+            {{- toYaml .Values.deployment.sidekiq.spec.containers.resources | nindent 12 }}
           command: [ "sidekiq", "-C", "config/sidekiq.yml" ]
           ports:
             - containerPort: 7433
-          {{ if .Values.sidekiq.deployment.spec.containers.livenessProbe.enabled }}
+          {{ if .Values.deployment.sidekiq.spec.containers.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
               path: /sidekiq_alive
               port: 7433
-            initialDelaySeconds: {{ .Values.sidekiq.deployment.spec.containers.livenessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.sidekiq.deployment.spec.containers.livenessProbe.timeoutSeconds }}
+            initialDelaySeconds: {{ .Values.deployment.sidekiq.spec.containers.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.sidekiq.spec.containers.livenessProbe.timeoutSeconds }}
           {{ end }}
-          {{ if .Values.sidekiq.deployment.spec.containers.readinessProbe.enabled }}
+          {{ if .Values.deployment.sidekiq.spec.containers.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: /sidekiq_alive
               port: 7433
-            initialDelaySeconds: {{ .Values.sidekiq.deployment.spec.containers.readinessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.sidekiq.deployment.spec.containers.readinessProbe.timeoutSeconds }}
+            initialDelaySeconds: {{ .Values.deployment.sidekiq.spec.containers.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.sidekiq.spec.containers.readinessProbe.timeoutSeconds }}
           {{ end }}
           lifecycle:
             preStop:
@@ -60,6 +70,6 @@ spec:
                   fieldPath: status.podIP
           envFrom:
             - configMapRef:
-                name: {{ .Values.sidekiq.configMap.name }}
+                name: {{ printf "%s-%s" $fullName "config" }}
             - secretRef:
-                name: {{ .Values.sidekiq.secretRef.name }}
+                name: {{ printf "%s-%s" $fullName "secrets" }}

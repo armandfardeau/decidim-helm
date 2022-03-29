@@ -1,44 +1,114 @@
-# Default values for ..
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Decidim Helm values
+# Tree:
+# |__ Image:
+#   | <Docker image>
+# |__ kubernetes-kind:
+#   |__ sidekiq | web:
+#     | <YAML configuration>
 
-replicaCount: 1
-
+# / Not a Kubernetes kind
+# https://kubernetes.io/docs/concepts/
+# Image contains information concerning the docker image of the application.
 image:
   repository: rg.fr-par.scw.cloud/decidim-sen/decidim-sen
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
 
-imagePullSecrets: [ ]
+nameOverride: false
+fullnameOverride: false
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: { }
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+# A Deployment provides declarative updates for Pods and ReplicaSets.
+# Documentation: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+deployment:
+  web:
+    name: "web"
+    nameOverride: ""
+    fullname: ""
+    fullnameOverride: false
+    replicasCount: 2
+    spec:
+      termination:
+        gracePeriodSeconds: 120
+      containers:
+        port: 3000
+        resources: { }
+          # We usually recommend not to specify default resources and to leave this as a conscious
+          # choice for the user. This also increases chances charts run on environments with little
+          # resources, such as Minikube. If you do want to specify resources, uncomment the following
+          # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+          # limits:
+          #   cpu: 100m
+          #   memory: 128Mi
+          # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+        securityContext: { }
+          # capabilities:
+          #   drop:
+          #   - ALL
+          # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        startupProbe:
+          path: ""
+          initialDelaySeconds: 30
+          failureThreshold: 30
+          periodSeconds: 10
+      imagePullSecrets: [ ]
+      podAnnotations: { }
+      podSecurityContext: { }
+      nodeSelector: { }
+      tolerations: [ ]
+  sidekiq:
+    name: "sidekiq"
+    nameOverride: ""
+    fullname: ""
+    fullnameOverride: false
+    replicasCount: 2
+    spec:
+      podAnnotations: { }
+      containers:
+        resources: { }
+        livenessProbe:
+          enabled: true
+          initialDelaySeconds: 60
+          timeoutSeconds: 30
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 60
+          timeoutSeconds: 30
+      termination:
+        gracePeriodSeconds: 120
 
-podAnnotations: { }
+# A HorizontalPodAutoscaler automatically updates a workload resource (such as a Deployment or StatefulSet), with the aim of automatically scaling the workload to match demand.
+# Documentation: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+hpa:
+  sidekiq:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 70
+    stabilizationWindowSeconds: 30
+    targetMemoryUtilizationPercentage: ""
+  web:
+    enabled: true
+    minReplicas: 6
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 70
+    stabilizationWindowSeconds: 30
+    targetMemoryUtilizationPercentage: ""
 
-podSecurityContext: { }
-# fsGroup: 2000
-
-securityContext: { }
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
-
+# An abstract way to expose an application running on a set of Pods as a network service.
+# Documentation: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
   type: LoadBalancer
   port: 80
   targetPort: 3000
 
+# An API object that manages external access to the services in a cluster, typically HTTP.
+# Ingress may provide load balancing, SSL termination and name-based virtual hosting.
+# Documentation: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   enabled: true
   className: ""
@@ -56,39 +126,14 @@ ingress:
         -  chart-example.local
       secretName: decidim-sen-ingress-secret
 
-resources: { }
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-#   cpu: 100m
-#   memory: 128Mi
-
-webAutoscaling:
-  enabled: true
-  minReplicas: 6
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 70
-  stabilizationWindowSeconds: 30
-
-sdqAutoscaling:
-  enabled: true
-  minReplicas: 2
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 70
-  stabilizationWindowSeconds: 30
-
-nodeSelector: { }
-
-tolerations: [ ]
-
-affinity: { }
-
-webContainerPort: 3000
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
 
 migrateJob:
   ttlSecondsAfterFinished: 120
@@ -99,51 +144,27 @@ databases:
     externalPostgresDabatase: false
     database_url: "host.example.org"
 
-#### SIDEKIQ Deployment ####
-
-sidekiq:
-  configMap:
-    name: decidim-sen-sidekiq-config
-    data:
-      RAILS_ENV: production
-      APP_NAME: "decidim_sen"
-      RAILS_LOG_TO_STDOUT: "true"
-    ############ data ################
-    ## Must be a yaml format like below  ##
-    ## Uncomment these lines to specify  ##
-    #data:
-    #  RAILS_ENV: production
-    #  APP_NAME: "decidim_sen"
-    #  RAILS_LOG_TO_STDOUT: 'true'
-    #######################################
-  deployment:
-    name: sidekiq-sen-sidekiq-deployment
-    spec:
-      labels:
-        app: decidim-sen-sidekiq
-      affinity:
-        termination:
-          gracePeriodSeconds: 60 # Put your longest job here
-      containers:
-        livenessProbe:
-          enabled: "true"
-          initialDelaySeconds: 60 # app specific. Time your sidekiq takes to start processing.
-          timeoutSeconds: 5 # can be much less
-        readinessProbe:
-          enabled: "true"
-          initialDelaySeconds: 60 # app specific. Time your sidekiq takes to start processing.
-          timeoutSeconds: 5 # can be much less
-        resources: {}
-        ############ Resources ################
-        ## Must be a yaml format like below  ##
-        ## Uncomment these lines to specify  ##
-        #resources:
-        #  requests:
-        #    cpu: "100m"
-        #    memory: "450Mi"
-        #  limits:
-        #    cpu: "1200m"
-        #    memory: "1200Mi"
-        #######################################
-  secretRef:
-    name: decidim-sidekiq-secret
+redis:
+  auth:
+   enabled: false
+  cluster:
+    slaveCount: 3
+  securityContext:
+    enabled: true
+    fsGroup: 2000
+    runAsUser: 1000
+  volumePermissions:
+    enabled: true
+    persistence:
+      enabled: true
+      path: /data
+      size: 8Gi
+  master:
+    persistence:
+      storageClass: "scw-bssd-retain"
+  slave:
+    persistence:
+      enabled: true
+      path: /data
+      size: 8Gi
+      storageClass: "scw-bssd-retain"
