@@ -144,7 +144,7 @@ databases:
     externalPostgresDabatase: false
     database_url: "host.example.org"
 
-redis:
+redis-cluster:
   auth:
    enabled: false
   cluster:
