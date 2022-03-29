@@ -6,7 +6,7 @@
 #   |__ sidekiq | web:
 #     | <YAML configuration>
 
-# /!\ Not a Kubernetes kind
+# / Not a Kubernetes kind
 # https://kubernetes.io/docs/concepts/
 # Image contains information concerning the docker image of the application.
 image:
@@ -15,17 +15,21 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
 
+nameOverride: false
+fullnameOverride: false
+
 # A Deployment provides declarative updates for Pods and ReplicaSets.
 # Documentation: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   web:
-    name: ""
+    name: "web"
     nameOverride: ""
     fullname: ""
-    fullnameOverride: ""
-    replicaCount: 1
+    fullnameOverride: false
+    replicasCount: 2
     spec:
-      affinity: { }
+      termination:
+        gracePeriodSeconds: 120
       containers:
         port: 3000
         resources: { }
@@ -57,10 +61,25 @@ deployment:
       nodeSelector: { }
       tolerations: [ ]
   sidekiq:
-    name: ""
+    name: "sidekiq"
     nameOverride: ""
     fullname: ""
-    fullnameOverride: ""
+    fullnameOverride: false
+    replicasCount: 2
+    spec:
+      podAnnotations: { }
+      containers:
+        resources: { }
+        livenessProbe:
+          enabled: true
+          initialDelaySeconds: 60
+          timeoutSeconds: 30
+        readinessProbe:
+          enabled: true
+          initialDelaySeconds: 60
+          timeoutSeconds: 30
+      termination:
+        gracePeriodSeconds: 120
 
 # A HorizontalPodAutoscaler automatically updates a workload resource (such as a Deployment or StatefulSet), with the aim of automatically scaling the workload to match demand.
 # Documentation: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -124,3 +143,28 @@ databases:
   postgresql:
     externalPostgresDabatase: false
     database_url: "host.example.org"
+
+redis:
+  auth:
+   enabled: false
+  cluster:
+    slaveCount: 3
+  securityContext:
+    enabled: true
+    fsGroup: 2000
+    runAsUser: 1000
+  volumePermissions:
+    enabled: true
+    persistence:
+      enabled: true
+      path: /data
+      size: 8Gi
+  master:
+    persistence:
+      storageClass: "scw-bssd-retain"
+  slave:
+    persistence:
+      enabled: true
+      path: /data
+      size: 8Gi
+      storageClass: "scw-bssd-retain"
