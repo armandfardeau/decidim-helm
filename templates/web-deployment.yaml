@@ -44,7 +44,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           ports:
-            - containerPort: {{ .Values.webContainerPort }}
+            - containerPort: {{ default 3000 .Values.webContainerPort }}
           env:
             - name: POD_IP
               valueFrom:
