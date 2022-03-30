@@ -31,12 +31,12 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - {{- include "decidim-helm.sdqSelectorLabels" . | nindent 8 }}
+                        - {{- include "decidim-helm.sdqFullname" . }}
                 topologyKey: topology.kubernetes.io/zone
       terminationGracePeriodSeconds: {{ .Values.deployment.sidekiq.spec.termination.gracePeriodSeconds }}
       containers:
-        - name: {{- include "decidim-helm.sdqLabels" . | nindent 4 }}
-          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+        - name: {{ include "decidim-helm.sdqFullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           resources:
             {{- toYaml .Values.deployment.sidekiq.spec.containers.resources | nindent 12 }}
           command: [ "sidekiq", "-C", "config/sidekiq.yml" ]

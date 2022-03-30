@@ -21,7 +21,6 @@ spec:
       labels:
         {{- include "decidim-helm.webSelectorLabels" . | nindent 8 }}
     spec:
-      {{ .Values.deployment.sidekiq.spec.termination.gracePeriodSeconds }}
       {{- with .Values.deployment.web.spec.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -30,7 +29,7 @@ spec:
       securityContext:
         {{- toYaml .Values.deployment.web.spec.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ include "decidim-helm.webFullname" . }}
           securityContext:
             {{- toYaml .Values.deployment.web.spec.containers.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -70,6 +69,6 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - {{- include "decidim-helm.webSelectorLabels" . | nindent 8 }}
+                        - {{- include "decidim-helm.webFullname" . }}
                 topologyKey: topology.kubernetes.io/zone
       terminationGracePeriodSeconds: {{ .Values.deployment.web.spec.termination.gracePeriodSeconds }}
