@@ -69,6 +69,6 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - {{- include "decidim-helm.webFullname" . }}
+                        - {{ include "decidim-helm.webFullname" . }}
                 topologyKey: topology.kubernetes.io/zone
       terminationGracePeriodSeconds: {{ .Values.deployment.web.spec.termination.gracePeriodSeconds }}

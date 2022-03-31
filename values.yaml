@@ -139,10 +139,7 @@ migrateJob:
   ttlSecondsAfterFinished: 120
   command: ["bundle",  "exec", "rails", "db:migrate"]
 
-databases:
-  postgresql:
-    externalPostgresDabatase: false
-    database_url: "host.example.org"
+database_url: "host.example.org"
 
 redis-cluster:
   auth:

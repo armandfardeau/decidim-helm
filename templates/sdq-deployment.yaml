@@ -31,7 +31,7 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - {{- include "decidim-helm.sdqFullname" . }}
+                        - {{ include "decidim-helm.sdqFullname" . }}
                 topologyKey: topology.kubernetes.io/zone
       terminationGracePeriodSeconds: {{ .Values.deployment.sidekiq.spec.termination.gracePeriodSeconds }}
       containers:
