@@ -9,10 +9,13 @@ pre_install:
       --set installCRDs=true
 
 install:
-	helm install release . --set database_url=$(DATABASE_URL)
+	helm install release . --set database_url=$(DATABASE_URL) --set ingress.hosts[0]=$(HOST) --set ingress.tls.hosts[0]=$(HOST)
 
 upgrade:
 	./upgrade.sh
 
 rollback-0:
 	helm rollback release 0
+
+uninstall:
+	helm uninstall release
